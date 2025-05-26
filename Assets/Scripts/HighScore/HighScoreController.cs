@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,6 +15,9 @@ public class HighScoreController : MonoBehaviour
     [SerializeField]
     private Timer timer;
 
+    [SerializeField]
+    private NameEntry nameEntry;
+
     private int activeHighScorePanelIndex = -1;
 
     private void Awake()
@@ -25,6 +29,7 @@ public class HighScoreController : MonoBehaviour
         }
 
         LoadHighScores();
+        nameEntry.gameObject.SetActive(false);
     }
 
     private void OnEnable()
@@ -64,11 +69,11 @@ public class HighScoreController : MonoBehaviour
             HighScoreData data = list.HighScores[index];
             if (time < data.GetParsedTime())
             {
-                // Ask for the player's name.
-                list.InsertHighScore("AAA", timer.GetCurrentTimeString(), index);
+                nameEntry.AskPlayerName(list, timer.GetCurrentTimeString(), index);
                 break;
             }
         }
+
     }
 
     private void OnApplicationPause(bool pause)
@@ -76,9 +81,7 @@ public class HighScoreController : MonoBehaviour
         if (pause)
         {
             SaveHighScores();
-        } else
-        {
-
+            PlayerPrefs.Save();
         }
     }
 
