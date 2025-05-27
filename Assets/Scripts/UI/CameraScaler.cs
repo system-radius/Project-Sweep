@@ -24,7 +24,7 @@ public class CameraScaler : MonoBehaviour
     private float maxOrthoSize = 5f;
 
     [SerializeField]
-    private float padding = 200f;
+    private float padding = 2f;
 
     private float prevDistance = 0f;
     private float distance = 0f;
@@ -147,7 +147,7 @@ public class CameraScaler : MonoBehaviour
         float screenAspectRatio = (float)Screen.width / Screen.height;
 
         Bounds bounds = new Bounds(parentTransform.GetChild(0).position, Vector3.zero);
-        foreach(Transform t in parentTransform)
+        foreach (Transform t in parentTransform)
         {
             bounds.Encapsulate(t.position);
         }
@@ -168,6 +168,6 @@ public class CameraScaler : MonoBehaviour
         halfWidth = worldCamera.aspect * (maxOrthoSize - padding);
         //halfWidth = worldCamera.aspect * halfHeight;
 
-        Debug.LogError("Center: " + bounds.center + ", min: " + minBounds.ToString() + ", max: " + maxBounds + ", halfHeight: " + halfHeight + ", halfWidth: " + halfWidth);
+        //Debug.LogError("Center: " + bounds.center + ", min: " + minBounds.ToString() + ", max: " + maxBounds + ", halfHeight: " + halfHeight + ", halfWidth: " + halfWidth);
     }
 }

@@ -275,15 +275,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 7066881872283377624}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f932e6983e3c5494eb8adc802157e545, type: 3}
+  m_Script: {fileID: 11500000, guid: 5114ef16e3a7d534990ced4ab04e0660, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprites:
-  - {fileID: 21300000, guid: c2f2e43ca603a694285058f5ea396c8a, type: 3}
-  - {fileID: 21300000, guid: fe9d2ad0a7669f34a94185efe188461b, type: 3}
-  - {fileID: 21300000, guid: 68bab887248c21645a1e791732971b9d, type: 3}
-  - {fileID: 21300000, guid: 33da0389a439bb243bd5ce5f6b978370, type: 3}
-  displayState: 1
+  tmp: {fileID: 1669927326928934208}
 --- !u!114 &3561254363995851828
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -293,7 +288,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 7066881872283377624}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ca7f5983d423284f884cc3df970f711, type: 3}
+  m_Script: {fileID: 11500000, guid: 2ae7cc1815a66f24c8effcbbbba504b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tmp: {fileID: 1669927326928934208}
+  sprites:
+  - {fileID: 21300000, guid: c2f2e43ca603a694285058f5ea396c8a, type: 3}
+  - {fileID: 21300000, guid: fe9d2ad0a7669f34a94185efe188461b, type: 3}
+  - {fileID: 21300000, guid: 68bab887248c21645a1e791732971b9d, type: 3}
+  - {fileID: 21300000, guid: 33da0389a439bb243bd5ce5f6b978370, type: 3}
+  displayState: 1

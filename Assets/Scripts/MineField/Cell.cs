@@ -38,6 +38,11 @@ public class Cell : MonoBehaviour
         new Color(128 / 256f, 128 / 256f, 128 / 256f)
     };
 
+    public bool IsNeighbor(Cell that)
+    {
+        return this.neighbors.Contains(that);
+    }
+
     public void AddNeighbor(Cell that)
     {
         if (this == that) return;

@@ -46,6 +46,8 @@ public class MineField : MonoBehaviour
         gameController.OnTriggerHold += TriggerHold;
         gameController.OnInitialTrigger += Populate;
         gameController.OnRestartGame += GenerateField;
+        gameController.OnPauseGame += HideField;
+        gameController.OnResumeGame += ShowField;
     }
 
     private void OnDisable()
@@ -54,6 +56,19 @@ public class MineField : MonoBehaviour
         gameController.OnTriggerHold -= TriggerHold;
         gameController.OnInitialTrigger -= Populate;
         gameController.OnRestartGame -= GenerateField;
+
+        gameController.OnPauseGame -= HideField;
+        gameController.OnResumeGame -= ShowField;
+    }
+
+    private void HideField()
+    {
+        cellsParent.SetActive(false);
+    }
+
+    private void ShowField()
+    {
+        cellsParent.SetActive(true);
     }
 
     private void GenerateField(LevelData level)
@@ -139,7 +154,7 @@ public class MineField : MonoBehaviour
                 int y = Random.Range(0, sizeY);
 
                 Cell cell = cells[x, y];
-                if (cell.IsRigged() || (cell == originCell))
+                if (cell.IsRigged() || (cell == originCell || originCell.IsNeighbor(cell)))
                 {
                     continue;
                 }

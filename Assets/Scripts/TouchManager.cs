@@ -119,7 +119,7 @@ public class TouchManager : MonoBehaviour
         Vector2 touchPoint = primaryTouchPosition.ReadValue<Vector2>();
         //Vector2 delta = new Vector2((touchPoint.x - prevTouchPoint.x) * movementSpeed, (touchPoint.y - prevTouchPoint.y) * movementSpeed);
         Vector2 screenDelta = touchPoint - prevTouchPoint;
-        if (screenDelta.sqrMagnitude < 1f) return;
+        if (screenDelta.sqrMagnitude < 100f) return;
         Vector2 delta = (worldCamera.ScreenToWorldPoint(touchPoint) - worldCamera.ScreenToWorldPoint(touchPoint - screenDelta)) * movementSpeed;
 
         // Check the current delta with threshold to avoid accidental drags when the intent is to tap/hold.
