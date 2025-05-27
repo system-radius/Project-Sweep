@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(Camera))]
 public class CameraScaler : MonoBehaviour
@@ -9,7 +10,9 @@ public class CameraScaler : MonoBehaviour
 
     private Camera worldCamera;
     [SerializeField]
-    private float cameraSpeed = 8f;
+    private float zoomSpeed = 8f;
+    [SerializeField]
+    private float dragSpeed = 0.5f;
 
     [SerializeField]
     private float targetAspectX = 9f;
@@ -30,6 +33,15 @@ public class CameraScaler : MonoBehaviour
     public InputAction secondaryTouchPosition;
 
     private bool zooming = false;
+    private bool moving = false;
+    private Vector2 prevPosition = Vector2.zero;
+    private Vector2 deltaVector = Vector2.zero;
+
+    private Vector2 minBounds = Vector2.zero;
+    private Vector2 maxBounds = Vector2.zero;
+
+    private float halfHeight = 5f;
+    private float halfWidth = 5f;
 
     private void Awake()
     {
@@ -42,12 +54,14 @@ public class CameraScaler : MonoBehaviour
     {
         touchManager.OnZoomStart += ZoomStart;
         touchManager.OnZoomEnd += ZoomEnd;
+        touchManager.OnCameraMove += Move;
     }
 
     private void OnDisable()
     {
         touchManager.OnZoomStart -= ZoomStart;
         touchManager.OnZoomEnd -= ZoomEnd;
+        touchManager.OnCameraMove -= Move;
     }
 
     private void ZoomStart()
@@ -78,9 +92,22 @@ public class CameraScaler : MonoBehaviour
 
         if (diff != 0)
         {
-            worldCamera.orthographicSize = Mathf.Lerp(worldCamera.orthographicSize, targetOrthoSize, Time.deltaTime * cameraSpeed);
+            worldCamera.orthographicSize = Mathf.Lerp(worldCamera.orthographicSize, targetOrthoSize, Time.deltaTime * zoomSpeed);
+            ClampCameraPosition(new Vector2(worldCamera.transform.position.x, worldCamera.transform.position.y));
         }
         prevDistance = distance;
+    }
+
+    private void Move(Vector2 delta)
+    {
+        float deltaX = -delta.x * Time.deltaTime + worldCamera.transform.position.x;
+        float deltaY = -delta.y * Time.deltaTime + worldCamera.transform.position.y;
+
+        //Debug.LogError("Delta: (" + delta.x + ", " + delta.y + ")");
+        //Debug.LogError("Delta: (" + delta.x + ", " + delta.y + "), position: (" + worldCamera.transform.position.x + ", " + worldCamera.transform.position.y + "), after: (" + deltaX + ", " + deltaY + ")");
+
+        ClampCameraPosition(new Vector2((float)deltaX, (float)deltaY));
+        //worldCamera.transform.Translate(-delta.x * Time.deltaTime, -delta.y * Time.deltaTime, 0);
     }
 
     private void Update()
@@ -89,6 +116,29 @@ public class CameraScaler : MonoBehaviour
         {
             Zoom();
         }
+    }
+
+    private void ClampCameraPosition(Vector2 position)
+    {
+        halfHeight = worldCamera.orthographicSize / 1.25f;
+        halfWidth = worldCamera.aspect * worldCamera.orthographicSize;
+
+        float x = ClampValue(position.x, minBounds.x + halfWidth, maxBounds.x - halfWidth);
+        float y = ClampValue(position.y, minBounds.y + halfHeight, maxBounds.y - halfHeight);
+
+        //Debug.LogError("[" + worldCamera.orthographicSize + "] :: [" + position.x + " -> " + x + ", " + position.y + " -> " + y + "] --> X bounds: [" + (minBounds.x + halfWidth) + ", " + (maxBounds.x - halfWidth) + "], Y bounds: [" + (minBounds.y + halfHeight) + ", " + (maxBounds.y - halfHeight) + "]");
+        worldCamera.transform.position = new Vector3(x, y, worldCamera.transform.position.z);
+    }
+
+    private float ClampValue(float value, float min, float max)
+    {
+        if (min > max)
+        {
+            Debug.LogError("Returning center due to inverted clamping: " + ((min + max) / 2f));
+            return (min + max) / 2f;
+        }
+
+        return Mathf.Clamp(value, min, max);
     }
 
     public void AdjustCameraSize(Transform parentTransform)
@@ -110,5 +160,14 @@ public class CameraScaler : MonoBehaviour
         worldCamera.orthographicSize = Mathf.Max(width, height);
         worldCamera.orthographicSize += padding;
         maxOrthoSize = worldCamera.orthographicSize;
+
+        minBounds = bounds.min;
+        maxBounds = bounds.max;
+
+        halfHeight = (maxOrthoSize - padding);
+        halfWidth = worldCamera.aspect * (maxOrthoSize - padding);
+        //halfWidth = worldCamera.aspect * halfHeight;
+
+        Debug.LogError("Center: " + bounds.center + ", min: " + minBounds.ToString() + ", max: " + maxBounds + ", halfHeight: " + halfHeight + ", halfWidth: " + halfWidth);
     }
 }
