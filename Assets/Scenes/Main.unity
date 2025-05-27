@@ -1183,10 +1183,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bfccdc4464067c45b87f1dfab0ecd25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  touchManager: {fileID: 1905147219}
+  cameraSpeed: 8
   targetAspectX: 9
   targetAspectY: 16
   baseOrthographicSize: 5
   padding: 1
+  primaryTouchPosition:
+    m_Name: Primary Touch Position
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 598ea972-86c1-4b75-a1f0-763790bbb8ea
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  secondaryTouchPosition:
+    m_Name: Secondary Touch Position
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 5e0b3dc0-8fda-4828-a843-44700df28009
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
 --- !u!1 &520208731
 GameObject:
   m_ObjectHideFlags: 0
@@ -3825,6 +3845,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worldCamera: {fileID: 519420031}
+  primaryTouchPosition:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 16e377b8-dd1d-4de1-9b0f-3ee5b823d5bf
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  secondaryTouchPosition:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 761d0d12-fa7d-48b8-885d-633b9a48eaf1
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
 --- !u!114 &1905147220
 MonoBehaviour:
   m_ObjectHideFlags: 0

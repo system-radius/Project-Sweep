@@ -1,9 +1,15 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Camera))]
 public class CameraScaler : MonoBehaviour
 {
+    [SerializeField]
+    private TouchManager touchManager;
+
     private Camera worldCamera;
+    [SerializeField]
+    private float cameraSpeed = 8f;
 
     [SerializeField]
     private float targetAspectX = 9f;
@@ -12,35 +18,77 @@ public class CameraScaler : MonoBehaviour
 
     [SerializeField]
     private float baseOrthographicSize = 5f;
+    private float maxOrthoSize = 5f;
 
     [SerializeField]
     private float padding = 200f;
 
+    private float prevDistance = 0f;
+    private float distance = 0f;
+
+    public InputAction primaryTouchPosition;
+    public InputAction secondaryTouchPosition;
+
+    private bool zooming = false;
+
     private void Awake()
     {
         worldCamera = GetComponent<Camera>();
-        /*
-        float targetAspect = targetAspectX / targetAspectY;
-        float windowAspect = (float) Screen.width / (float) Screen.height;
-        float scaleHeight = windowAspect / targetAspect;
+        primaryTouchPosition = touchManager.primaryTouchPosition;
+        secondaryTouchPosition = touchManager.secondaryTouchPosition;
+    }
 
-        Rect rect = worldCamera.rect;
-        if (scaleHeight < 1)
+    private void OnEnable()
+    {
+        touchManager.OnZoomStart += ZoomStart;
+        touchManager.OnZoomEnd += ZoomEnd;
+    }
+
+    private void OnDisable()
+    {
+        touchManager.OnZoomStart -= ZoomStart;
+        touchManager.OnZoomEnd -= ZoomEnd;
+    }
+
+    private void ZoomStart()
+    {
+        zooming = true;
+    }
+
+    private void ZoomEnd()
+    {
+        distance = prevDistance = 0f;
+        zooming = false;
+    }
+
+    private void Zoom()
+    {
+        distance = Vector2.Distance(primaryTouchPosition.ReadValue<Vector2>(), secondaryTouchPosition.ReadValue<Vector2>());
+        float targetOrthoSize = maxOrthoSize;
+        float diff = Mathf.RoundToInt(distance - prevDistance);
+        if (diff < 0)
         {
-            rect.width = 1;
-            rect.height = scaleHeight;
-            rect.x = 0;
-            rect.y = (1f - scaleHeight) / 2f;
-        } else
-        {
-            float scaleWidth = 1f / scaleHeight;
-            rect.width = scaleWidth;
-            rect.height = 1f;
-            rect.x = (1f - scaleWidth) / 2f;
-            rect.y = 0;
+            targetOrthoSize = Mathf.Clamp(worldCamera.orthographicSize + 1, baseOrthographicSize, maxOrthoSize);
         }
-        worldCamera.rect = rect;
-        */
+        else if (diff > 0)
+        {
+            targetOrthoSize = Mathf.Clamp(worldCamera.orthographicSize - 1, baseOrthographicSize, maxOrthoSize);
+            
+        }
+
+        if (diff != 0)
+        {
+            worldCamera.orthographicSize = Mathf.Lerp(worldCamera.orthographicSize, targetOrthoSize, Time.deltaTime * cameraSpeed);
+        }
+        prevDistance = distance;
+    }
+
+    private void Update()
+    {
+        if (zooming)
+        {
+            Zoom();
+        }
     }
 
     public void AdjustCameraSize(Transform parentTransform)
@@ -59,9 +107,8 @@ public class CameraScaler : MonoBehaviour
         float width = bounds.size.x / (2f * screenAspectRatio);
         float height = bounds.size.y / 2f;
 
-        Debug.Log("Calculated bounds: " + width + ", " + height);
-
         worldCamera.orthographicSize = Mathf.Max(width, height);
         worldCamera.orthographicSize += padding;
+        maxOrthoSize = worldCamera.orthographicSize;
     }
 }

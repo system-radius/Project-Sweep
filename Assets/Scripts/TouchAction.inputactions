@@ -6,6 +6,24 @@
             "id": "b1a92b43-01f9-4d0d-b364-20644a9af4ff",
             "actions": [
                 {
+                    "name": "Tap",
+                    "type": "Button",
+                    "id": "8c9dfaa2-ce32-4aa1-8c20-1c454f57eec4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Tap",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Hold",
+                    "type": "Button",
+                    "id": "ba75cef6-9df9-4cae-85b8-75d96b7e2f9c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Hold(duration=0.3,pressPoint=0.5)",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "Pause",
                     "type": "Button",
                     "id": "79232e0d-fd36-4797-a8cb-50a0b9e58ac9",
@@ -39,24 +57,6 @@
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
-                    "name": "Tap",
-                    "type": "Button",
-                    "id": "8c9dfaa2-ce32-4aa1-8c20-1c454f57eec4",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "Tap",
-                    "initialStateCheck": true
-                },
-                {
-                    "name": "Hold",
-                    "type": "Button",
-                    "id": "ba75cef6-9df9-4cae-85b8-75d96b7e2f9c",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "Hold(duration=0.3,pressPoint=0.5)",
                     "initialStateCheck": true
                 },
                 {

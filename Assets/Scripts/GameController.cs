@@ -74,20 +74,12 @@ public class GameController : MonoBehaviour, IGameController
         RestartGame();
     }
 
-    IEnumerator DelayUnpause()
-    {
-        fromPause = true;
-        yield return new WaitForSeconds(0.1f);
-        fromPause = false;
-    }
-
     private void RestartGame()
     {
         //Debug.Log("Restarting game!");
         OnRestartGame?.Invoke(level);
         OnResumeGame?.Invoke();
         state = GameState.START;
-        StartCoroutine(DelayUnpause());
     }
 
     private void ResumeGame()
@@ -96,7 +88,6 @@ public class GameController : MonoBehaviour, IGameController
         state = prePauseState;
         OnResumeGame?.Invoke();
         if (GameState.PLAY == state) OnStartGame?.Invoke();
-        StartCoroutine(DelayUnpause());
     }
 
     private void PauseGame()
@@ -120,11 +111,10 @@ public class GameController : MonoBehaviour, IGameController
 
     private bool VerifyState(Vector3 position)
     {
-        if (GameState.GAME_OVER == state || GameState.PAUSED == state || fromPause) return false;
+        if (GameState.GAME_OVER == state || GameState.PAUSED == state) return false;
 
         if ((GameState.START == state && (OnInitialTrigger?.Invoke(position) ?? false)))
         {
-            Debug.Log("Triggered game start!");
             OnStartGame?.Invoke();
         }
 

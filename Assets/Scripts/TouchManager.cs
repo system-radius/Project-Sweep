@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerInput))]
@@ -11,13 +13,13 @@ public class TouchManager : MonoBehaviour
     private PlayerInput input;
     private InputAction tapAction;
     private InputAction holdAction;
-    private InputAction touchPosition;
     private InputAction pauseAction;
     private InputAction resumeAction;
     private InputAction restartAction;
-
     private InputAction secondaryTouchContact;
-    private InputAction secondaryTouchPosition;
+
+    public InputAction primaryTouchPosition;
+    public InputAction secondaryTouchPosition;
     //private InputAction touchPressAction;
 
     public event Action<Vector3> OnTriggerTap;
@@ -25,17 +27,26 @@ public class TouchManager : MonoBehaviour
     public event Action OnTriggerPause;
     public event Action OnTriggerResume;
     public event Action OnTriggerRestart;
+    public event Action OnZoomStart;
+    public event Action OnZoomEnd;
+
+
+    private bool activeGameplayControls = true;
+    private bool zooming = false;
 
     private void Awake()
     {
         input = GetComponent<PlayerInput>();
         tapAction = input.actions["Tap"];
         holdAction = input.actions["Hold"];
-        touchPosition = input.actions["Position"];
+        primaryTouchPosition = input.actions["Position"];
 
         pauseAction = input.actions["Pause"];
         resumeAction = input.actions["Resume"];
         restartAction = input.actions["Restart"];
+
+        secondaryTouchContact = input.actions["SecondaryTouchContact"];
+        secondaryTouchPosition = input.actions["SecondaryTouchPosition"];
     }
 
     private void OnEnable()
@@ -45,6 +56,9 @@ public class TouchManager : MonoBehaviour
         pauseAction.performed += TriggerPause;
         resumeAction.performed += TriggerResume;
         restartAction.performed += TriggerRestart;
+
+        secondaryTouchContact.started += ZoomStart;
+        secondaryTouchContact.canceled += ZoomEnd;
     }
 
     private void OnDisable()
@@ -54,27 +68,47 @@ public class TouchManager : MonoBehaviour
         pauseAction.performed -= TriggerPause;
         resumeAction.performed -= TriggerResume;
         restartAction.performed -= TriggerRestart;
+
+        secondaryTouchContact.started -= ZoomStart;
+        secondaryTouchContact.canceled -= ZoomEnd;
+    }
+
+    private void ZoomStart(InputAction.CallbackContext context)
+    {
+        if (!activeGameplayControls) return;
+        zooming = true;
+        OnZoomStart?.Invoke();
+    }
+
+    private void ZoomEnd(InputAction.CallbackContext context)
+    {
+        if (!zooming) return;
+        ActivateGameplayControls();
+        OnZoomEnd?.Invoke();
     }
 
     private void TriggerPause(InputAction.CallbackContext context)
     {
-        //Debug.Log("Game is paused!");
         OnTriggerPause?.Invoke();
+        activeGameplayControls = false;
     }
 
     private void TriggerResume(InputAction.CallbackContext context)
     {
         OnTriggerResume?.Invoke();
+        ActivateGameplayControls();
     }
 
     private void TriggerRestart(InputAction.CallbackContext context)
     {
         OnTriggerRestart?.Invoke();
+        ActivateGameplayControls();
     }
 
     private void OnScreenTap(InputAction.CallbackContext context)
     {
-        Vector3 position = worldCamera.ScreenToWorldPoint(touchPosition.ReadValue<Vector2>());
+        if (!activeGameplayControls || zooming) return;
+        Vector3 position = worldCamera.ScreenToWorldPoint(primaryTouchPosition.ReadValue<Vector2>());
         position.z = 0;
         //Debug.Log("[TAP] Performed @: " + position);
         OnTriggerTap?.Invoke(position);
@@ -82,10 +116,22 @@ public class TouchManager : MonoBehaviour
 
     private void OnScreenHold(InputAction.CallbackContext context)
     {
-        Vector3 position = worldCamera.ScreenToWorldPoint(touchPosition.ReadValue<Vector2>());
+        if (!activeGameplayControls || zooming) return;
+        Vector3 position = worldCamera.ScreenToWorldPoint(primaryTouchPosition.ReadValue<Vector2>());
         position.z = 0;
         //Debug.Log("[HOLD] Performed @: " + position);
         OnTriggerHold?.Invoke(position);
     }
 
+    private void ActivateGameplayControls()
+    {
+        StartCoroutine(ActivateGameplayControlsCoroutine());
+    }
+
+    IEnumerator ActivateGameplayControlsCoroutine()
+    {
+        yield return new WaitForSeconds(0.1f);
+        activeGameplayControls = true;
+        zooming = false;
+    }
 }
