@@ -13,6 +13,8 @@ public class LevelSelection : MonoBehaviour
     [SerializeField]
     private List<LevelData> levels = new();
 
+    public int selectedIndex = 0;
+
     private void Awake()
     {
         dropdown = GetComponent<TMP_Dropdown>();
@@ -35,11 +37,25 @@ public class LevelSelection : MonoBehaviour
 
     private void OnDropdownChange(int index)
     {
+        selectedIndex = index;
         LevelChange?.Invoke(levels[index]);
+        SaveData();
     }
 
     public LevelData GetDefaultLevelData()
     {
-        return levels[0];
+        selectedIndex = PlayerPrefs.GetInt("SavedLevel", 0);
+        dropdown.onValueChanged.RemoveListener(OnDropdownChange);
+        dropdown.value = selectedIndex;
+        dropdown.RefreshShownValue();
+        dropdown.onValueChanged.AddListener(OnDropdownChange);
+        return levels[selectedIndex];
+    }
+
+    private void SaveData()
+    {
+        Debug.LogError("Saving level data!");
+        PlayerPrefs.SetInt("SavedLevel", selectedIndex);
+        PlayerPrefs.Save();
     }
 }

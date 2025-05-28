@@ -65,7 +65,7 @@ public class GameController : MonoBehaviour, IGameController
     private void LevelChanged(LevelData newLevel)
     {
         level = newLevel;
-        //Debug.Log("Level changed: " + newLevel.displayName);
+        Debug.Log("Level changed: " + newLevel.displayName);
         OnLevelChanged?.Invoke(newLevel);
     }
 

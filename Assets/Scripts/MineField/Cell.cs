@@ -69,6 +69,7 @@ public class Cell : MonoBehaviour
         if (IsRigged())
         {
             if (!forced) OnGameOverTrigger?.Invoke();
+            VibrationHelper.Vibrate(500);
             return false;
         }
         if (IsRevealed()) return true;
@@ -88,6 +89,7 @@ public class Cell : MonoBehaviour
     {
         if (IsRigged()) return false;
 
+        VibrationHelper.Vibrate(50);
         int flags = neighbors.FindAll(c => c.IsFlagged()).Count;
         if (flags != value) return true;
 
@@ -143,6 +145,7 @@ public class Cell : MonoBehaviour
             return Chord();
         }
 
+        VibrationHelper.Vibrate(50);
         return Reveal();
     }
 

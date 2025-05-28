@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -29,6 +30,8 @@ public class MineField : MonoBehaviour
     private bool firstTap = true;
 
     private GameObject cellsParent;
+
+    public Action<int> OnUpdateFlagCount;
 
     private void Awake()
     {
@@ -150,8 +153,8 @@ public class MineField : MonoBehaviour
             bool minePlaced = false;
             do
             {
-                int x = Random.Range(0, sizeX);
-                int y = Random.Range(0, sizeY);
+                int x = UnityEngine.Random.Range(0, sizeX);
+                int y = UnityEngine.Random.Range(0, sizeY);
 
                 Cell cell = cells[x, y];
                 if (cell.IsRigged() || (cell == originCell || originCell.IsNeighbor(cell)))
@@ -194,7 +197,14 @@ public class MineField : MonoBehaviour
     {
         Cell cell = GetCellByPosition(position);
         if (cell == null) return 0;
+        bool flagged = cell.IsFlagged();
         bool continuePlay = cell.TriggerTap();
+
+        if (flagged != cell.IsFlagged())
+        {
+            OnUpdateFlagCount?.Invoke(flagged ? 1 : -1);
+        }
+
         if (!continuePlay) RevealAll();
         bool win = CheckWinState();
         return continuePlay && !win ? 0 : win ? 1 : -1; ;
