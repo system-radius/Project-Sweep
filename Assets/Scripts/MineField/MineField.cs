@@ -24,7 +24,7 @@ public class MineField : MonoBehaviour
     public int sizeY = 10;
     public int mines = 10;
 
-    private Cell[,] cells;
+    private CellController[,] cells;
 
     [SerializeField]
     private bool firstTap = true;
@@ -88,7 +88,7 @@ public class MineField : MonoBehaviour
 
         if (cells != null)
         {
-            foreach (Cell cell in cells)
+            foreach (CellController cell in cells)
             {
                 Destroy(cell.gameObject);
             }
@@ -101,7 +101,7 @@ public class MineField : MonoBehaviour
 
         cellsParent = new GameObject("CellsParent");
 
-        cells = new Cell[sizeX, sizeY];
+        cells = new CellController[sizeX, sizeY];
         for (int i = 0; i < sizeX; i++)
         {
             for (int j = 0; j < sizeY; j++)
@@ -118,13 +118,13 @@ public class MineField : MonoBehaviour
     {
         GameObject cell = Instantiate(cellGameObject, transform);
         cell.transform.position = new Vector3(x, y, 0);
-        cells[x, y] = cell.GetComponent<Cell>();
+        cells[x, y] = cell.GetComponent<CellController>();
         RegisterNeighbors(x, y);
     }
 
     private void RegisterNeighbors(int x, int y)
     {
-        Cell cell = cells[x, y];
+        CellController cell = cells[x, y];
         for (int i = -1; i <= 1; i++)
         {
             int checkX = x + i;
@@ -133,7 +133,7 @@ public class MineField : MonoBehaviour
             {
                 int checkY = y + j;
                 if (checkY < 0 || checkY >= sizeY) continue;
-                Cell neighbor = cells[checkX, checkY];
+                CellController neighbor = cells[checkX, checkY];
                 if (neighbor == null)continue;
 
                 cell.AddNeighbor(neighbor);
@@ -145,7 +145,7 @@ public class MineField : MonoBehaviour
     {
         if (!firstTap) return true;
         int mines = this.mines;
-        Cell originCell = GetCellByPosition(position);
+        CellController originCell = GetCellByPosition(position);
         if (originCell == null) return false;
         while (mines > 0)
         {
@@ -156,7 +156,7 @@ public class MineField : MonoBehaviour
                 int x = UnityEngine.Random.Range(0, sizeX);
                 int y = UnityEngine.Random.Range(0, sizeY);
 
-                Cell cell = cells[x, y];
+                CellController cell = cells[x, y];
                 if (cell.IsRigged() || (cell == originCell || originCell.IsNeighbor(cell)))
                 {
                     continue;
@@ -173,7 +173,7 @@ public class MineField : MonoBehaviour
     private bool CheckWinState()
     {
         bool win = true;
-        foreach (Cell cell in cells)
+        foreach (CellController cell in cells)
         {
             // For a win to be detected, all cells that are not rigged must be revealed.
             win = cell.IsRevealed() || cell.IsRigged();
@@ -186,16 +186,15 @@ public class MineField : MonoBehaviour
 
     private void RevealAll()
     {
-        foreach (Cell cell in cells)
+        foreach (CellController cell in cells)
         {
-            if (cell.IsFlagged() && !cell.IsRigged()) cell.TriggerWrongFlag();
-            else if (cell.IsRigged() && !cell.IsFlagged()) cell.Reveal(true);
+            cell.ForceReveal();
         }
     }
 
     public int TriggerTap(Vector3 position)
     {
-        Cell cell = GetCellByPosition(position);
+        CellController cell = GetCellByPosition(position);
         if (cell == null) return 0;
         bool flagged = cell.IsFlagged();
         bool continuePlay = cell.TriggerTap();
@@ -212,7 +211,7 @@ public class MineField : MonoBehaviour
 
     public int TriggerHold(Vector3 position)
     {
-        Cell cell = GetCellByPosition(position);
+        CellController cell = GetCellByPosition(position);
         if (cell == null) return 0;
         bool continuePlay = cell.TriggerHold();
         if (!continuePlay) RevealAll();
@@ -220,7 +219,7 @@ public class MineField : MonoBehaviour
         return continuePlay && !win ? 0 : win ? 1 : -1;
     }
 
-    private Cell GetCellByPosition(Vector3 position)
+    private CellController GetCellByPosition(Vector3 position)
     {
         int x = Mathf.RoundToInt(position.x);
         int y = Mathf.RoundToInt(position.y);

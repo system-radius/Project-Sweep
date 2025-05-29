@@ -1,49 +1,35 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 /*
  * A cell is the building block for the game. It is supposed to track whether it is rigged, as well as its neighbors.
  */
-public class Cell : MonoBehaviour
+public class CellController : MonoBehaviour
 {
-    [SerializeField]
-    private TextMeshPro tmp;
-
     public event Action<bool> OnCellTrigger;
     public event Action<bool> OnCellFlag;
+    public event Action<int> OnCellReveal;
 
     public event Action OnWrongFlag;
     public event Action OnGameOverTrigger;
     public event Action OnRestart;
 
-    private bool rigged = false;
-    private bool flagged = false;
+    private CellModel model;
 
-    private int value = -1;
+    private readonly List<CellController> neighbors = new List<CellController>();
 
-    private readonly List<Cell> neighbors = new List<Cell>();
-
-    private Color[] colors =
+    private void Awake()
     {
-        new Color(0 / 256f, 0 / 256f, 0 / 256f),
-        new Color(2/256f, 2/256f, 241/256f),
-        new Color(54 / 256f, 126 / 256f, 26 / 256f),
-        new Color(236 / 256f, 51 / 256f, 36 / 256f),
-        new Color(1 / 256f, 2 / 256f, 122 / 256f),
-        new Color(116 / 256f, 24 / 256f, 12 / 256f),
-        new Color(57 / 256f, 124 / 256f, 118 / 256f),
-        new Color(1 / 256f, 1 / 256f, 1 / 256f),
-        new Color(128 / 256f, 128 / 256f, 128 / 256f)
-    };
+        model = new CellModel();
+    }
 
-    public bool IsNeighbor(Cell that)
+    public bool IsNeighbor(CellController that)
     {
         return this.neighbors.Contains(that);
     }
 
-    public void AddNeighbor(Cell that)
+    public void AddNeighbor(CellController that)
     {
         if (this == that) return;
         if (!this.neighbors.Contains(that)) this.neighbors.Add(that);
@@ -53,7 +39,7 @@ public class Cell : MonoBehaviour
     private bool RevealNeighbors(bool forced = false)
     {
         bool state = true;
-        foreach (Cell cell in neighbors)
+        foreach (CellController cell in neighbors)
         {
             if (cell.IsFlagged()) continue;
             bool currentCellState = cell.Reveal(forced);
@@ -61,6 +47,12 @@ public class Cell : MonoBehaviour
         }
 
         return state;
+    }
+
+    public void ForceReveal()
+    {
+        if (IsFlagged() && !IsRigged()) OnWrongFlag?.Invoke();
+        else if (IsRigged() && !IsFlagged()) Reveal(true);
     }
 
     public bool Reveal(bool forced = false)
@@ -74,11 +66,10 @@ public class Cell : MonoBehaviour
         }
         if (IsRevealed()) return true;
 
-        value = neighbors.FindAll(c => c.IsRigged()).Count;
-        if (value > 0 && value < 9)
+        model.value = neighbors.FindAll(c => c.IsRigged()).Count;
+        if (model.value > 0)
         {
-            tmp.text = value.ToString();
-            tmp.color = colors[value];
+            OnCellReveal?.Invoke(model.value);
             return true;
         }
 
@@ -91,39 +82,34 @@ public class Cell : MonoBehaviour
 
         VibrationHelper.Vibrate(50);
         int flags = neighbors.FindAll(c => c.IsFlagged()).Count;
-        if (flags != value) return true;
+        if (flags != model.value) return true;
 
         return RevealNeighbors();
     }
 
-    public int GetValue()
-    {
-        return value;
-    }
-
     public void Rig()
     {
-        rigged = true;
+        model.rigged = true;
     }
 
     public bool IsRigged()
     {
-        return rigged;
+        return model.rigged;
     }
 
     public void Flag()
     {
-        flagged = !flagged;
+        model.flagged = !model.flagged;
     }
 
     public bool IsFlagged()
     {
-        return flagged;
+        return model.flagged;
     }
 
     public bool IsRevealed()
     {
-        return value >= 0;
+        return model.value >= 0;
     }
 
     public bool TriggerTap()
@@ -133,7 +119,7 @@ public class Cell : MonoBehaviour
             return Chord();
         }
         Flag();
-        OnCellFlag?.Invoke(flagged);
+        OnCellFlag?.Invoke(model.flagged);
         return true;
     }
 
@@ -147,18 +133,5 @@ public class Cell : MonoBehaviour
 
         VibrationHelper.Vibrate(50);
         return Reveal();
-    }
-
-    public void TriggerWrongFlag()
-    {
-        OnWrongFlag?.Invoke();
-    }
-
-    public void Restart()
-    {
-        value = -1;
-        flagged = false;
-        rigged = false;
-        tmp.text = "";
     }
 }
