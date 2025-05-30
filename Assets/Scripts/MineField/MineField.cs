@@ -24,7 +24,7 @@ public class MineField : MonoBehaviour
     public int sizeY = 10;
     public int mines = 10;
 
-    private CellController[,] cells;
+    private CellController[,] cellControllers;
 
     [SerializeField]
     private bool firstTap = true;
@@ -86,9 +86,9 @@ public class MineField : MonoBehaviour
 
         Debug.Log("Generating board: [" + sizeX + ", " + sizeY + "]");
 
-        if (cells != null)
+        if (cellControllers != null)
         {
-            foreach (CellController cell in cells)
+            foreach (CellController cell in cellControllers)
             {
                 Destroy(cell.gameObject);
             }
@@ -101,7 +101,7 @@ public class MineField : MonoBehaviour
 
         cellsParent = new GameObject("CellsParent");
 
-        cells = new CellController[sizeX, sizeY];
+        cellControllers = new CellController[sizeX, sizeY];
         for (int i = 0; i < sizeX; i++)
         {
             for (int j = 0; j < sizeY; j++)
@@ -118,13 +118,13 @@ public class MineField : MonoBehaviour
     {
         GameObject cell = Instantiate(cellGameObject, transform);
         cell.transform.position = new Vector3(x, y, 0);
-        cells[x, y] = cell.GetComponent<CellController>();
+        cellControllers[x, y] = cell.GetComponent<CellController>();
         RegisterNeighbors(x, y);
     }
 
     private void RegisterNeighbors(int x, int y)
     {
-        CellController cell = cells[x, y];
+        CellController cell = cellControllers[x, y];
         for (int i = -1; i <= 1; i++)
         {
             int checkX = x + i;
@@ -133,10 +133,10 @@ public class MineField : MonoBehaviour
             {
                 int checkY = y + j;
                 if (checkY < 0 || checkY >= sizeY) continue;
-                CellController neighbor = cells[checkX, checkY];
+                CellController neighbor = cellControllers[checkX, checkY];
                 if (neighbor == null)continue;
 
-                cell.AddNeighbor(neighbor);
+                cell.model.AddNeighbor(neighbor.model);
             }
         }
     }
@@ -156,13 +156,13 @@ public class MineField : MonoBehaviour
                 int x = UnityEngine.Random.Range(0, sizeX);
                 int y = UnityEngine.Random.Range(0, sizeY);
 
-                CellController cell = cells[x, y];
-                if (cell.IsRigged() || (cell == originCell || originCell.IsNeighbor(cell)))
+                CellController cell = cellControllers[x, y];
+                if (cell.model.IsRigged() || (cell == originCell || originCell.model.IsNeighbor(cell.model)))
                 {
                     continue;
                 }
 
-                cell.Rig();
+                cell.model.Rig();
                 minePlaced = true;
             } while (!minePlaced);
         }
@@ -173,10 +173,10 @@ public class MineField : MonoBehaviour
     private bool CheckWinState()
     {
         bool win = true;
-        foreach (CellController cell in cells)
+        foreach (CellController cell in cellControllers)
         {
             // For a win to be detected, all cells that are not rigged must be revealed.
-            win = cell.IsRevealed() || cell.IsRigged();
+            win = cell.model.IsRevealed() || cell.model.IsRigged();
             if (!win) break;
         }
 
@@ -186,9 +186,9 @@ public class MineField : MonoBehaviour
 
     private void RevealAll()
     {
-        foreach (CellController cell in cells)
+        foreach (CellController cell in cellControllers)
         {
-            cell.ForceReveal();
+            cell.model.ForceReveal();
         }
     }
 
@@ -196,10 +196,10 @@ public class MineField : MonoBehaviour
     {
         CellController cell = GetCellByPosition(position);
         if (cell == null) return 0;
-        bool flagged = cell.IsFlagged();
+        bool flagged = cell.model.IsFlagged();
         bool continuePlay = cell.TriggerTap();
 
-        if (flagged != cell.IsFlagged())
+        if (flagged != cell.model.IsFlagged())
         {
             OnUpdateFlagCount?.Invoke(flagged ? 1 : -1);
         }
@@ -225,6 +225,6 @@ public class MineField : MonoBehaviour
         int y = Mathf.RoundToInt(position.y);
 
         if (x < 0 || x >= sizeX || y < 0 || y >= sizeY) return null;
-        return cells[x, y];
+        return cellControllers[x, y];
     }
 }

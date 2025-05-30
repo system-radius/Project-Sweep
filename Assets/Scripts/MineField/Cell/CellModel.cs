@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-/*
- * A cell is the building block for the game. It is supposed to track whether it is rigged, as well as its neighbors.
- */
-public class CellController : MonoBehaviour
+public class CellModel
 {
+    private int value = -1;
+    private bool rigged = false;
+    private bool flagged = false;
+
     public event Action<bool> OnCellTrigger;
     public event Action<bool> OnCellFlag;
     public event Action<int> OnCellReveal;
@@ -15,21 +15,14 @@ public class CellController : MonoBehaviour
     public event Action OnGameOverTrigger;
     public event Action OnRestart;
 
-    private CellModel model;
+    private readonly List<CellModel> neighbors = new List<CellModel>();
 
-    private readonly List<CellController> neighbors = new List<CellController>();
-
-    private void Awake()
-    {
-        model = new CellModel();
-    }
-
-    public bool IsNeighbor(CellController that)
+    public bool IsNeighbor(CellModel that)
     {
         return this.neighbors.Contains(that);
     }
 
-    public void AddNeighbor(CellController that)
+    public void AddNeighbor(CellModel that)
     {
         if (this == that) return;
         if (!this.neighbors.Contains(that)) this.neighbors.Add(that);
@@ -39,7 +32,7 @@ public class CellController : MonoBehaviour
     private bool RevealNeighbors(bool forced = false)
     {
         bool state = true;
-        foreach (CellController cell in neighbors)
+        foreach (CellModel cell in neighbors)
         {
             if (cell.IsFlagged()) continue;
             bool currentCellState = cell.Reveal(forced);
@@ -66,72 +59,50 @@ public class CellController : MonoBehaviour
         }
         if (IsRevealed()) return true;
 
-        model.value = neighbors.FindAll(c => c.IsRigged()).Count;
-        if (model.value > 0)
+        value = neighbors.FindAll(c => c.IsRigged()).Count;
+        if (value > 0)
         {
-            OnCellReveal?.Invoke(model.value);
+            OnCellReveal?.Invoke(value);
             return true;
         }
 
         return RevealNeighbors(forced);
     }
 
-    private bool Chord()
+    public bool Chord()
     {
         if (IsRigged()) return false;
 
         VibrationHelper.Vibrate(50);
         int flags = neighbors.FindAll(c => c.IsFlagged()).Count;
-        if (flags != model.value) return true;
+        if (flags != value) return true;
 
         return RevealNeighbors();
     }
 
     public void Rig()
     {
-        model.rigged = true;
+        rigged = true;
     }
 
     public bool IsRigged()
     {
-        return model.rigged;
+        return rigged;
     }
 
     public void Flag()
     {
-        model.flagged = !model.flagged;
+        flagged = !flagged;
+        OnCellFlag?.Invoke(flagged);
     }
 
     public bool IsFlagged()
     {
-        return model.flagged;
+        return flagged;
     }
 
     public bool IsRevealed()
     {
-        return model.value >= 0;
-    }
-
-    public bool TriggerTap()
-    {
-        if (IsRevealed())
-        {
-            return Chord();
-        }
-        Flag();
-        OnCellFlag?.Invoke(model.flagged);
-        return true;
-    }
-
-    public bool TriggerHold()
-    {
-        if (IsFlagged()) return true;
-        if (IsRevealed())
-        {
-            return Chord();
-        }
-
-        VibrationHelper.Vibrate(50);
-        return Reveal();
+        return value >= 0;
     }
 }

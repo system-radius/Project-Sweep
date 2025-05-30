@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using TMPro;
 
 [RequireComponent(typeof(SpriteRenderer))]
-[RequireComponent(typeof(CellController))]
 public class CellView : MonoBehaviour
 {
     [SerializeField]
@@ -14,7 +13,6 @@ public class CellView : MonoBehaviour
     public CellDisplayState displayState = CellDisplayState.WAITING;
 
     private SpriteRenderer spriteRenderer;
-    private CellController cell;
 
     private static Color[] colors =
     {
@@ -32,25 +30,6 @@ public class CellView : MonoBehaviour
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer> ();
-        cell = GetComponent<CellController> ();
-    }
-
-    private void OnEnable()
-    {
-        cell.OnCellTrigger += TriggerCell;
-        cell.OnCellReveal += RevealCell;
-        cell.OnCellFlag += FlagCell;
-        cell.OnWrongFlag += SetWrongFlag;
-        cell.OnGameOverTrigger += SetGameOverTrigger;
-    }
-
-    private void OnDisable()
-    {
-        cell.OnCellTrigger -= TriggerCell;
-        cell.OnCellReveal -= RevealCell;
-        cell.OnCellFlag -= FlagCell;
-        cell.OnWrongFlag -= SetWrongFlag;
-        cell.OnGameOverTrigger -= SetGameOverTrigger;
     }
 
     public void RevealCell(int value)
