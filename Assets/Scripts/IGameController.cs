@@ -5,6 +5,7 @@ public interface IGameController
 {
     event Func<Vector3, int> OnTriggerTap;
     event Func<Vector3, int> OnTriggerHold;
+    event Action OnStopHold;
 
     event Func<Vector3, bool> OnInitialTrigger;
     event Action OnStartGame;

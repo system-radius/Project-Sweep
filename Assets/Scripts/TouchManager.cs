@@ -28,6 +28,7 @@ public class TouchManager : MonoBehaviour
 
     public event Action<Vector3> OnTriggerTap;
     public event Action<Vector3> OnTriggerHold;
+    public event Action OnStopHold;
     public event Action OnTriggerPause;
     public event Action OnTriggerResume;
     public event Action OnTriggerRestart;
@@ -40,6 +41,7 @@ public class TouchManager : MonoBehaviour
     private bool zooming = false;
     private bool startTrackDrag = false;
     private bool dragging = false;
+    private bool holding = false;
 
     private Vector2 prevTouchPoint = Vector2.zero;
 
@@ -66,6 +68,7 @@ public class TouchManager : MonoBehaviour
     {
         tapAction.performed += OnScreenTap;
         holdAction.performed += OnScreenHold;
+        holdAction.canceled += OnScreenHoldStop;
         pauseAction.performed += TriggerPause;
         resumeAction.performed += TriggerResume;
         restartAction.performed += TriggerRestart;
@@ -82,6 +85,7 @@ public class TouchManager : MonoBehaviour
     {
         tapAction.performed -= OnScreenTap;
         holdAction.performed -= OnScreenHold;
+        holdAction.canceled -= OnScreenHoldStop;
         pauseAction.performed -= TriggerPause;
         resumeAction.performed -= TriggerResume;
         restartAction.performed -= TriggerRestart;
@@ -180,6 +184,11 @@ public class TouchManager : MonoBehaviour
         position.z = 0;
         //Debug.Log("[HOLD] Performed @: " + position);
         OnTriggerHold?.Invoke(position);
+    }
+
+    private void OnScreenHoldStop(InputAction.CallbackContext context)
+    {
+        OnStopHold?.Invoke();
     }
 
     private void ActivateGameplayControls()

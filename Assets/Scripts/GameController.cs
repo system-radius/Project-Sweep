@@ -16,6 +16,7 @@ public class GameController : MonoBehaviour, IGameController
 
     public event Func<Vector3, int> OnTriggerTap;
     public event Func<Vector3, int> OnTriggerHold;
+    public event Action OnStopHold;
 
     [SerializeField]
     private TouchManager touchManager;
@@ -40,6 +41,7 @@ public class GameController : MonoBehaviour, IGameController
     {
         touchManager.OnTriggerTap += TriggerTap;
         touchManager.OnTriggerHold += TriggerHold;
+        touchManager.OnStopHold += TriggerStopHold;
         touchManager.OnTriggerPause += PauseGame;
         touchManager.OnTriggerResume += ResumeGame;
         touchManager.OnTriggerRestart += RestartGame;
@@ -53,6 +55,7 @@ public class GameController : MonoBehaviour, IGameController
     {
         touchManager.OnTriggerTap -= TriggerTap;
         touchManager.OnTriggerHold -= TriggerHold;
+        touchManager.OnStopHold -= TriggerStopHold;
         touchManager.OnTriggerPause -= PauseGame;
         touchManager.OnTriggerResume -= ResumeGame;
         touchManager.OnTriggerRestart -= RestartGame;
@@ -160,6 +163,11 @@ public class GameController : MonoBehaviour, IGameController
             bool continuePlay = f(position);
         }
         */
+    }
+
+    private void TriggerStopHold()
+    {
+        OnStopHold?.Invoke();
     }
 }
 

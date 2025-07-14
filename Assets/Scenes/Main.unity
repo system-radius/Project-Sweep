@@ -3767,6 +3767,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 811a995f9ca91de4f8fe1315f91118db, type: 2}
   - {fileID: 11400000, guid: d90f6f6c219182347bac9210be91ab09, type: 2}
   - {fileID: 11400000, guid: 3513351e90943a440942c083292eb4e5, type: 2}
+  selectedIndex: 0
 --- !u!1 &1559226497
 GameObject:
   m_ObjectHideFlags: 0
@@ -4618,7 +4619,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1917058456}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f0daf46e71a99f469d309bc44e75b87, type: 3}
+  m_Script: {fileID: 11500000, guid: e2359e4d2bc9f984a81a757eea2577de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   worldCamera: {fileID: 519420033}

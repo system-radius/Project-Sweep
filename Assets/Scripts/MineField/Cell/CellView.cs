@@ -41,6 +41,12 @@ public class CellView : MonoBehaviour
         }
     }
 
+    public void HighlightCell(bool highlight)
+    {
+        Color color = highlight ? Color.cyan : Color.white;
+        spriteRenderer.color = color;
+    }
+
     public void TriggerCell(bool state)
     {
         ChangeDisplayState(state ? CellDisplayState.TRIGGERED : CellDisplayState.REVEALED);

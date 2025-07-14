@@ -33,6 +33,8 @@ public class MineField : MonoBehaviour
 
     public Action<int> OnUpdateFlagCount;
 
+    private CellController lastCellInteraction;
+
     private void Awake()
     {
         //cells = new Cell[sizeX, sizeY];
@@ -47,6 +49,7 @@ public class MineField : MonoBehaviour
     {
         gameController.OnTriggerTap += TriggerTap;
         gameController.OnTriggerHold += TriggerHold;
+        gameController.OnStopHold += TriggerStopHold;
         gameController.OnInitialTrigger += Populate;
         gameController.OnRestartGame += GenerateField;
         gameController.OnPauseGame += HideField;
@@ -57,6 +60,7 @@ public class MineField : MonoBehaviour
     {
         gameController.OnTriggerTap -= TriggerTap;
         gameController.OnTriggerHold -= TriggerHold;
+        gameController.OnStopHold -= TriggerStopHold;
         gameController.OnInitialTrigger -= Populate;
         gameController.OnRestartGame -= GenerateField;
 
@@ -136,7 +140,7 @@ public class MineField : MonoBehaviour
                 CellController neighbor = cellControllers[checkX, checkY];
                 if (neighbor == null)continue;
 
-                cell.model.AddNeighbor(neighbor.model);
+                cell.AddNeighbor(neighbor);
             }
         }
     }
@@ -157,7 +161,7 @@ public class MineField : MonoBehaviour
                 int y = UnityEngine.Random.Range(0, sizeY);
 
                 CellController cell = cellControllers[x, y];
-                if (cell.model.IsRigged() || (cell == originCell || originCell.model.IsNeighbor(cell.model)))
+                if (cell.model.IsRigged() || (cell == originCell || originCell.IsNeighbor(cell)))
                 {
                     continue;
                 }
@@ -188,18 +192,18 @@ public class MineField : MonoBehaviour
     {
         foreach (CellController cell in cellControllers)
         {
-            cell.model.ForceReveal();
+            cell.ForceReveal();
         }
     }
 
     public int TriggerTap(Vector3 position)
     {
-        CellController cell = GetCellByPosition(position);
-        if (cell == null) return 0;
-        bool flagged = cell.model.IsFlagged();
-        bool continuePlay = cell.TriggerTap();
+        lastCellInteraction = GetCellByPosition(position);
+        if (lastCellInteraction == null) return 0;
+        bool flagged = lastCellInteraction.model.IsFlagged();
+        bool continuePlay = lastCellInteraction.TriggerTap();
 
-        if (flagged != cell.model.IsFlagged())
+        if (flagged != lastCellInteraction.model.IsFlagged())
         {
             OnUpdateFlagCount?.Invoke(flagged ? 1 : -1);
         }
@@ -211,9 +215,9 @@ public class MineField : MonoBehaviour
 
     public int TriggerHold(Vector3 position)
     {
-        CellController cell = GetCellByPosition(position);
-        if (cell == null) return 0;
-        bool continuePlay = cell.TriggerHold();
+        lastCellInteraction = GetCellByPosition(position);
+        if (lastCellInteraction == null) return 0;
+        bool continuePlay = lastCellInteraction.TriggerHold();
         if (!continuePlay) RevealAll();
         bool win = CheckWinState();
         return continuePlay && !win ? 0 : win ? 1 : -1;
@@ -226,5 +230,11 @@ public class MineField : MonoBehaviour
 
         if (x < 0 || x >= sizeX || y < 0 || y >= sizeY) return null;
         return cellControllers[x, y];
+    }
+
+    public void TriggerStopHold()
+    {
+        if (lastCellInteraction == null) return;
+        lastCellInteraction.StopHold();
     }
 }
